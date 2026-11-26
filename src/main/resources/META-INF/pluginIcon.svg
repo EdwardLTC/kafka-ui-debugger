@@ -1,12 +1,36 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M32.0845 7.94025V4H24.0203V7.9896H16.029V4H7.91553V7.94025H4V36H16.0044V32.0045C16.0058 30.9457 16.4274 29.9308 17.1766 29.1826C17.9258 28.4345 18.9412 28.0143 20 28.0143C21.0588 28.0143 22.0743 28.4345 22.8234 29.1826C23.5726 29.9308 23.9942 30.9457 23.9956 32.0045V36H36V7.94025H32.0845Z"
-          fill="url(#paint0_linear)"/>
+    <rect x="2" y="2" width="36" height="36" rx="9" fill="url(#bg_grad)"/>
+    <rect x="2.5" y="2.5" width="35" height="35" rx="8.5" stroke="url(#border_grad)" stroke-opacity="0.45"/>
+
+    <!-- Event streaming connection lines -->
+    <line x1="14.5" y1="20" x2="14.5" y2="11.5" stroke="url(#accent_grad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="14.5" y1="20" x2="14.5" y2="28.5" stroke="url(#accent_grad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="14.5" y1="20" x2="25.5" y2="13.5" stroke="url(#accent_grad)" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="14.5" y1="20" x2="25.5" y2="26.5" stroke="url(#accent_grad)" stroke-width="2.2" stroke-linecap="round"/>
+
+    <!-- Outer nodes -->
+    <circle cx="14.5" cy="10.5" r="3.2" fill="#0F172A" stroke="#38BDF8" stroke-width="2.2"/>
+    <circle cx="14.5" cy="29.5" r="3.2" fill="#0F172A" stroke="#818CF8" stroke-width="2.2"/>
+    <circle cx="26.5" cy="13" r="3.2" fill="#0F172A" stroke="#34D399" stroke-width="2.2"/>
+    <circle cx="26.5" cy="27" r="3.2" fill="#0F172A" stroke="#38BDF8" stroke-width="2.2"/>
+
+    <!-- Central hub node -->
+    <circle cx="14.5" cy="20" r="4.2" fill="url(#accent_grad)"/>
+    <circle cx="14.5" cy="20" r="1.7" fill="#0F172A"/>
+
     <defs>
-        <linearGradient id="paint0_linear" x1="2.94192" y1="4.89955" x2="37.7772" y2="39.7345"
-                        gradientUnits="userSpaceOnUse">
-            <stop offset="0.15937" stop-color="#3BEA62"/>
-            <stop offset="0.5404" stop-color="#3C99CC"/>
-            <stop offset="0.93739" stop-color="#6B57FF"/>
+        <linearGradient id="bg_grad" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#1E293B"/>
+            <stop offset="1" stop-color="#0B1120"/>
+        </linearGradient>
+        <linearGradient id="border_grad" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#38BDF8"/>
+            <stop offset="1" stop-color="#818CF8"/>
+        </linearGradient>
+        <linearGradient id="accent_grad" x1="10" y1="10" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#38BDF8"/>
+            <stop offset="0.55" stop-color="#34D399"/>
+            <stop offset="1" stop-color="#818CF8"/>
         </linearGradient>
     </defs>
 </svg>

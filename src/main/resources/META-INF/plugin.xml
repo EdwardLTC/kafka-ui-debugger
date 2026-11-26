@@ -2,19 +2,18 @@
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
     <id>dev.edward.kafka-ui-debugger</id>
+    <vendor url="https://github.com/EdwardLTC/AppleContainerManager">Edward</vendor>
 
     <!-- Public plugin name should be written in Title Case.
      Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
-    <name>Kafka-ui-debugger</name>
-
-    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor url="https://www.yourcompany.com">YourCompany</vendor>
+    <name>Kafka UI Debugger</name>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
     <description><![CDATA[
-        Enter short description for your plugin here.<br>
-        <em>most HTML tags may be used</em>
+        Kafka UI Debugger with Protobuf (.proto &amp; .desc) and Avro (.avsc) visualization,
+        schemaless wire decoding, Confluent Schema Registry header stripping, live tailing,
+        message replay, schema-based example generation, and consumer group lag inspection.
         ]]></description>
 
     <!-- Product and plugin compatibility requirements.
@@ -29,8 +28,10 @@
         <!-- If the plugin is published on JetBrains Marketplace, errors reported by users are available on the plugin page.
              See https://plugins.jetbrains.com/docs/marketplace/error-handler.html#developers-side for details. -->
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
-        <toolWindow id="MyToolWindow" factoryClass="dev.edward.MyToolWindowFactory"
-                    icon="AllIcons.Toolwindows.ToolWindowPalette"/>
+        <toolWindow id="Kafka Debugger"
+                    anchor="bottom"
+                    factoryClass="dev.edward.kafkadebugger.ui.KafkaDebuggerToolWindowFactory"
+                    icon="/icons/kafkaDebugger.svg"/>
     </extensions>
 
 </idea-plugin>

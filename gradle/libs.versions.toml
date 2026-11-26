@@ -1,5 +1,14 @@
 [versions]
 junit = "4.13.2"
+kafka = "3.9.0"
+protobuf = "3.25.5"
+wire = "5.1.0"
+avro = "1.12.0"
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf" }
+wire-schema = { module = "com.squareup.wire:wire-schema-jvm", version.ref = "wire" }
+avro = { module = "org.apache.avro:avro", version.ref = "avro" }
