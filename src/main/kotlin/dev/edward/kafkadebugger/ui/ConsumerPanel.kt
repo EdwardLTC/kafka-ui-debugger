@@ -170,7 +170,8 @@ class ConsumerPanel(
         val detailTabs = JBTabbedPane().apply {
             val copyBtn = JButton("Copy JSON").apply {
                 addActionListener {
-                    CopyPasteManager.getInstance().contents = StringSelection(jsonArea.text)
+                    @Suppress("UsePropertyAccessSyntax")
+                    CopyPasteManager.getInstance().setContents(StringSelection(jsonArea.text))
                 }
             }
             val replayBtn = JButton("Replay in Producer ->").apply {
