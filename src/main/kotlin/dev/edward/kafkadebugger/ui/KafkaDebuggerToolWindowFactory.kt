@@ -1,11 +1,13 @@
 package dev.edward.kafkadebugger.ui
 
 import com.intellij.icons.AllIcons
+import com.intellij.ide.setToolTipText
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.util.text.HtmlChunk
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.ColoredListCellRenderer
@@ -123,7 +125,7 @@ class KafkaDebuggerMainPanel(private val project: Project) : JPanel(BorderLayout
     }
 
     private fun iconButton(icon: Icon, tooltip: String): JButton = JButton(icon).apply {
-        toolTipText = tooltip
+        setToolTipText(HtmlChunk.text(tooltip))
         preferredSize = Dimension(28, 28)
         isFocusable = false
         isContentAreaFilled = false

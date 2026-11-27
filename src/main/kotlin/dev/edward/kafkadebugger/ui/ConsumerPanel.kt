@@ -1,9 +1,11 @@
 package dev.edward.kafkadebugger.ui
 
+import com.intellij.ide.setToolTipText
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.text.HtmlChunk
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.*
 import com.intellij.ui.table.JBTable
@@ -50,13 +52,13 @@ class ConsumerPanel(
     private val partitionCombo = ComboBox(arrayOf("All"))
     private val modeCombo = ComboBox(ConsumeMode.entries.toTypedArray())
     private val paramField = JBTextField("100", 7)
-    private val liveTailCheck = JBCheckBox("Live Tail", false)
+    private val liveTailCheck = JBCheckBox("Live tail", false)
     private val consumeButton = JButton("Consume")
     private val clearButton = JButton("Clear")
 
     private val protoTypeCombo = ComboBox<String>()
     private val stripConfluentCheck = JBCheckBox("Confluent", false).apply {
-        toolTipText = "Strip Confluent Schema Registry wire header"
+        HtmlChunk.text("Strip Confluent Schema Registry wire header")
     }
     private val filterField = JBTextField(18).apply {
         emptyText.text = "Filter key, value, offset..."
@@ -127,7 +129,9 @@ class ConsumerPanel(
 
     private fun buildLayout() {
         val topLeft = JPanel(FlowLayout(FlowLayout.LEFT, 5, 2)).apply {
-            add(topicCombo.apply { preferredSize = java.awt.Dimension(210, 26); toolTipText = "Topic" })
+            add(topicCombo.apply {
+                preferredSize = java.awt.Dimension(210, 26); setToolTipText(HtmlChunk.text("Topic"))
+            })
             add(JBLabel("Part:").apply { foreground = com.intellij.ui.JBColor.GRAY })
             add(partitionCombo)
             add(modeCombo)
@@ -166,7 +170,7 @@ class ConsumerPanel(
         val detailTabs = JBTabbedPane().apply {
             val copyBtn = JButton("Copy JSON").apply {
                 addActionListener {
-                    CopyPasteManager.getInstance().setContents(StringSelection(jsonArea.text))
+                    CopyPasteManager.getInstance().contents = StringSelection(jsonArea.text)
                 }
             }
             val replayBtn = JButton("Replay in Producer ->").apply {
@@ -241,19 +245,19 @@ class ConsumerPanel(
                 ConsumeMode.LAST_N -> {
                     paramField.isEnabled = true
                     paramField.text = "100"
-                    paramField.toolTipText = "Number of latest messages"
+                    paramField.setToolTipText(HtmlChunk.text("Number of latest messages"))
                 }
 
                 ConsumeMode.FROM_OFFSET -> {
                     paramField.isEnabled = true
                     paramField.text = "0"
-                    paramField.toolTipText = "Start offset"
+                    paramField.setToolTipText(HtmlChunk.text("Start offset"))
                 }
 
                 ConsumeMode.FROM_TIMESTAMP -> {
                     paramField.isEnabled = true
                     paramField.text = (System.currentTimeMillis() - 3600_000L).toString()
-                    paramField.toolTipText = "Epoch milliseconds"
+                    paramField.setToolTipText(HtmlChunk.text("Epoch milliseconds"))
                 }
 
                 else -> paramField.isEnabled = false
@@ -461,7 +465,7 @@ class ConsumerPanel(
         val note = if (decoded.errorNote != null) " | ${decoded.errorNote}" else ""
         val badgeText = "Decoder: ${decoded.decoderUsed}$note"
         decoderBadgeLabel.text = badgeText
-        decoderBadgeLabel.toolTipText = badgeText
+        decoderBadgeLabel.setToolTipText(HtmlChunk.text(badgeText))
 
         jsonArea.text = decoded.prettyJson
         jsonArea.caretPosition = 0

@@ -2,6 +2,7 @@ package dev.edward.kafkadebugger.ui
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
+import com.intellij.ide.setToolTipText
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
@@ -49,7 +50,7 @@ class ProducerPanel(project: Project) : JPanel(BorderLayout()) {
     private val formatCombo = ComboBox(PayloadFormat.entries.toTypedArray())
     private val protoTypeCombo = ComboBox<String>()
     private val confluentSchemaIdField = JBTextField("", 6).apply {
-        HtmlChunk.text("Optional Confluent Schema Registry ID (leave empty for raw protobuf)")
+        setToolTipText(HtmlChunk.text("Optional Confluent Schema Registry ID (leave empty for raw protobuf)"))
     }
 
     private val headersModel = DefaultTableModel(arrayOf("Key", "Value"), 0)
@@ -86,7 +87,7 @@ class ProducerPanel(project: Project) : JPanel(BorderLayout()) {
             val right = JPanel(FlowLayout(FlowLayout.RIGHT, 6, 0)).apply {
                 add(sendButton.apply {
                     preferredSize = Dimension(130, 28)
-                    font = font.deriveFont(java.awt.Font.BOLD)
+                    font = font.deriveFont(Font.BOLD)
                 })
             }
             add(left, BorderLayout.CENTER)
@@ -132,7 +133,9 @@ class ProducerPanel(project: Project) : JPanel(BorderLayout()) {
                 }, BorderLayout.EAST)
             }
             add(hdrBar, BorderLayout.NORTH)
-            add(JBScrollPane(headersTable).apply { border = BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border()) }, BorderLayout.CENTER)
+            add(JBScrollPane(headersTable).apply {
+                border = BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border())
+            }, BorderLayout.CENTER)
         }
 
         val payloadPanel = JPanel(BorderLayout()).apply {
@@ -141,7 +144,9 @@ class ProducerPanel(project: Project) : JPanel(BorderLayout()) {
                 add(JBLabel("Payload").apply { font = font.deriveFont(Font.BOLD) }, BorderLayout.WEST)
             }
             add(payBar, BorderLayout.NORTH)
-            add(JBScrollPane(payloadArea).apply { border = BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border()) }, BorderLayout.CENTER)
+            add(JBScrollPane(payloadArea).apply {
+                border = BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border())
+            }, BorderLayout.CENTER)
         }
 
         val splitter = JBSplitter(false, 0.68f).apply {

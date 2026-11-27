@@ -14,7 +14,6 @@ import dev.edward.kafkadebugger.model.ProtoSourceConfig
 import dev.edward.kafkadebugger.model.ProtoSourceType
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.apache.avro.Schema as AvroSchema
 import org.apache.avro.generic.GenericDatumReader
 import org.apache.avro.generic.GenericDatumWriter
 import org.apache.avro.generic.GenericRecord
@@ -24,6 +23,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.file.FileSystems
+import org.apache.avro.Schema as AvroSchema
 
 @Service(Service.Level.PROJECT)
 class ProtoRegistryService {
@@ -70,6 +70,7 @@ class ProtoRegistryService {
                         errors.add("Failed to load descriptor ${file.name}: ${e.message}")
                     }
                 }
+
                 ProtoSourceType.PROTO_DIR -> {
                     try {
                         val loader = SchemaLoader(FileSystems.getDefault())
@@ -86,6 +87,7 @@ class ProtoRegistryService {
                         errors.add("Failed to load .proto dir ${file.name}: ${e.message}")
                     }
                 }
+
                 ProtoSourceType.AVRO_FILE -> {
                     try {
                         val schema = AvroSchema.Parser().parse(file)
@@ -94,6 +96,7 @@ class ProtoRegistryService {
                         errors.add("Failed to load Avro schema ${file.name}: ${e.message}")
                     }
                 }
+
                 ProtoSourceType.AVRO_DIR -> {
                     val avscFiles = file.walkTopDown()
                         .filter { it.isFile && it.extension.equals("avsc", ignoreCase = true) }
@@ -324,6 +327,7 @@ class ProtoRegistryService {
             val schema = wireSchemas.firstOrNull { it.getType(messageFullName) is MessageType }
                 ?: throw IllegalArgumentException("Message type not found in loaded schemas: $messageFullName")
             val msgType = schema.getType(messageFullName) as MessageType
+
             @Suppress("UNCHECKED_CAST")
             val rawMap = gson.fromJson(json, Map::class.java) as? Map<String, Any?>
                 ?: throw IllegalArgumentException("Payload must be a JSON object")
@@ -391,6 +395,7 @@ class ProtoRegistryService {
         if (schema != null) {
             return try {
                 val adapter = schema.protoAdapter(messageFullName, true)
+
                 @Suppress("UNCHECKED_CAST")
                 val decoded = adapter.decode(payload) as Map<String, Any?>
                 val jsonReady = wireMapToJsonFriendly(decoded)
@@ -488,12 +493,14 @@ class ProtoRegistryService {
                 val sub = buildDynamicMessageTree(field.name, value)
                 sub.copy(fieldNumber = field.number)
             }
+
             is com.google.protobuf.ByteString -> ProtoTreeNode(
                 label = field.name,
                 typeName = "bytes",
                 value = "${value.size()} bytes",
                 fieldNumber = field.number
             )
+
             else -> ProtoTreeNode(
                 label = field.name,
                 typeName = field.type.name.lowercase(),
@@ -510,6 +517,7 @@ class ProtoRegistryService {
                     @Suppress("UNCHECKED_CAST")
                     buildWireTree(k, "message", v as Map<String, Any?>)
                 }
+
                 is List<*> -> {
                     val items = v.mapIndexed { idx, item ->
                         if (item is Map<*, *>) {
@@ -521,6 +529,7 @@ class ProtoRegistryService {
                     }
                     ProtoTreeNode(k, "repeated", "[${v.size} items]", children = items)
                 }
+
                 is ByteString -> ProtoTreeNode(k, "bytes", "${v.size} bytes")
                 else -> ProtoTreeNode(k, v?.javaClass?.simpleName ?: "null", v.toString())
             }
@@ -544,6 +553,7 @@ class ProtoRegistryService {
             }
             sub
         }
+
         is List<*> -> v.map { wireValueToJsonFriendly(it) }
         is ByteString -> v.base64()
         else -> v
@@ -610,58 +620,70 @@ class ProtoRegistryService {
                 for (branch in schema.types.filter { it.type != AvroSchema.Type.NULL }) {
                     try {
                         return coerceToAvro(value, branch)
-                    } catch (_: Exception) {}
+                    } catch (_: Exception) {
+                    }
                 }
                 null
             }
+
             AvroSchema.Type.RECORD -> {
                 @Suppress("UNCHECKED_CAST")
                 val map = value as? Map<String, Any?> ?: emptyMap()
                 jsonMapToGenericRecord(schema, map)
             }
+
             AvroSchema.Type.ARRAY -> {
                 val list = when (value) {
                     is List<*> -> value
-                    null -> emptyList<Any?>()
+                    null -> emptyList()
                     else -> listOf(value)
                 }
                 val avroList = org.apache.avro.generic.GenericData.Array<Any?>(list.size, schema)
                 list.forEach { avroList.add(coerceToAvro(it, schema.elementType)) }
                 avroList
             }
+
             AvroSchema.Type.MAP -> {
                 val m = value as? Map<*, *> ?: emptyMap<String, Any?>()
                 m.entries.associate { (k, v) -> k.toString() to coerceToAvro(v, schema.valueType) }
             }
+
             AvroSchema.Type.ENUM -> {
                 org.apache.avro.generic.GenericData.EnumSymbol(schema, value?.toString() ?: schema.enumSymbols.first())
             }
+
             AvroSchema.Type.FIXED -> {
                 val bytes = value?.toString()?.toByteArray(Charsets.UTF_8) ?: ByteArray(schema.fixedSize)
                 org.apache.avro.generic.GenericData.Fixed(schema, bytes.copyOf(schema.fixedSize))
             }
+
             AvroSchema.Type.STRING -> value?.toString() ?: ""
             AvroSchema.Type.BYTES -> ByteBuffer.wrap(value?.toString()?.toByteArray(Charsets.UTF_8) ?: ByteArray(0))
             AvroSchema.Type.INT -> when (value) {
                 is Number -> value.toInt()
                 else -> value?.toString()?.toIntOrNull() ?: 0
             }
+
             AvroSchema.Type.LONG -> when (value) {
                 is Number -> value.toLong()
                 else -> value?.toString()?.toLongOrNull() ?: 0L
             }
+
             AvroSchema.Type.FLOAT -> when (value) {
                 is Number -> value.toFloat()
                 else -> value?.toString()?.toFloatOrNull() ?: 0f
             }
+
             AvroSchema.Type.DOUBLE -> when (value) {
                 is Number -> value.toDouble()
                 else -> value?.toString()?.toDoubleOrNull() ?: 0.0
             }
+
             AvroSchema.Type.BOOLEAN -> when (value) {
                 is Boolean -> value
                 else -> value?.toString()?.toBooleanStrictOrNull() ?: false
             }
+
             AvroSchema.Type.NULL -> null
         }
     }
@@ -683,6 +705,7 @@ class ProtoRegistryService {
             }
             map
         }
+
         is Collection<*> -> v.map { avroValueToJsonFriendly(it) }
         is Map<*, *> -> {
             val map = linkedMapOf<String, Any?>()
@@ -691,12 +714,14 @@ class ProtoRegistryService {
             }
             map
         }
+
         is ByteBuffer -> {
             val dup = v.duplicate()
             val bytes = ByteArray(dup.remaining())
             dup.get(bytes)
             bytes.toByteString().base64()
         }
+
         is org.apache.avro.generic.GenericFixed -> v.bytes().toByteString().base64()
         is CharSequence, is Enum<*>, is org.apache.avro.generic.GenericEnumSymbol<*> -> v.toString()
         else -> v
@@ -713,6 +738,7 @@ class ProtoRegistryService {
                 }
                 ProtoTreeNode(label, value.schema.fullName, "${children.size} fields", children = children)
             }
+
             is Collection<*> -> {
                 val itemSchema = if (schema.type == AvroSchema.Type.ARRAY) schema.elementType else schema
                 val children = value.mapIndexed { idx, item ->
@@ -720,6 +746,7 @@ class ProtoRegistryService {
                 }
                 ProtoTreeNode(label, "array", "[${value.size} items]", children = children)
             }
+
             is Map<*, *> -> {
                 val valSchema = if (schema.type == AvroSchema.Type.MAP) schema.valueType else schema
                 val children = value.entries.map { (mk, mv) ->
@@ -727,6 +754,7 @@ class ProtoRegistryService {
                 }
                 ProtoTreeNode(label, "map", "{${value.size} entries}", children = children)
             }
+
             is ByteBuffer -> ProtoTreeNode(label, "bytes", "${value.remaining()} bytes")
             else -> ProtoTreeNode(label, schema.type.getName(), value.toString())
         }

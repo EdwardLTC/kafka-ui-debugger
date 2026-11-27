@@ -36,9 +36,11 @@ object SchemaExampleGenerator {
             Descriptors.FieldDescriptor.Type.INT32, Descriptors.FieldDescriptor.Type.SINT32,
             Descriptors.FieldDescriptor.Type.SFIXED32, Descriptors.FieldDescriptor.Type.UINT32,
             Descriptors.FieldDescriptor.Type.FIXED32 -> exampleInt(field.name)
+
             Descriptors.FieldDescriptor.Type.INT64, Descriptors.FieldDescriptor.Type.SINT64,
             Descriptors.FieldDescriptor.Type.SFIXED64, Descriptors.FieldDescriptor.Type.UINT64,
             Descriptors.FieldDescriptor.Type.FIXED64 -> exampleLong(field.name)
+
             Descriptors.FieldDescriptor.Type.FLOAT -> 1.0f
             Descriptors.FieldDescriptor.Type.DOUBLE -> 1.0
             Descriptors.FieldDescriptor.Type.STRING -> exampleString(field.name)
@@ -56,7 +58,7 @@ object SchemaExampleGenerator {
         val map = linkedMapOf<String, Any?>()
         for (field in msgType.fields) {
             val typeName = field.type.toString()
-            val value: Any? = if (field.isRepeated) {
+            val value: Any = if (field.isRepeated) {
                 listOf(singleValueForWireField(typeName, field.name, schema, depth))
             } else {
                 singleValueForWireField(typeName, field.name, schema, depth)
@@ -66,7 +68,7 @@ object SchemaExampleGenerator {
         return map
     }
 
-    private fun singleValueForWireField(typeName: String, fieldName: String, schema: Schema, depth: Int): Any? =
+    private fun singleValueForWireField(typeName: String, fieldName: String, schema: Schema, depth: Int): Any =
         when (typeName) {
             "bool" -> true
             "int32", "sint32", "sfixed32", "uint32", "fixed32" -> exampleInt(fieldName)
@@ -76,8 +78,7 @@ object SchemaExampleGenerator {
             "string" -> exampleString(fieldName)
             "bytes" -> ""
             else -> {
-                val resolved = schema.getType(typeName)
-                when (resolved) {
+                when (val resolved = schema.getType(typeName)) {
                     is MessageType -> fromWireMessageType(typeName, schema, depth + 1)
                     is EnumType -> resolved.constants.firstOrNull()?.name ?: "UNKNOWN"
                     else -> exampleString(fieldName)
@@ -99,11 +100,13 @@ object SchemaExampleGenerator {
                 }
                 map
             }
+
             AvroSchema.Type.UNION -> {
                 // Pick the first non-null type in union
                 val chosen = schema.types.firstOrNull { it.type != AvroSchema.Type.NULL }
                 if (chosen != null) fromAvroSchema(chosen, depth) else null
             }
+
             AvroSchema.Type.ARRAY -> listOf(fromAvroSchema(schema.elementType, depth + 1))
             AvroSchema.Type.MAP -> mapOf("key" to fromAvroSchema(schema.valueType, depth + 1))
             AvroSchema.Type.ENUM -> schema.enumSymbols.firstOrNull() ?: "UNKNOWN"
@@ -173,8 +176,10 @@ object SchemaExampleGenerator {
         name.contains("time", ignoreCase = true) || name.contains("at", ignoreCase = true)
                 || name.contains("date", ignoreCase = true) || name.contains("ts", ignoreCase = true) ->
             System.currentTimeMillis()
+
         name.contains("amount", ignoreCase = true) || name.contains("price", ignoreCase = true)
                 || name.contains("cents", ignoreCase = true) -> 100000L
+
         else -> 1L
     }
 }
